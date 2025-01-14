@@ -35,7 +35,7 @@ function StatusPage() {
   const [error, setError] = useState<EvosError>();
   const [status, setStatus] = useState<Status>();
   const [expanded, setExpanded] = useState(false);
-  const { ip, activeUser, gameExpanded } = EvosStore();
+  const { ip, activeUser, gameExpanded, exePath, setExePath } = EvosStore();
   const { t } = useTranslation();
   const [playerInfoList, setPlayerInfoList] = useState<PlayerData[]>([]);
   const navigate = useNavigate();
@@ -167,6 +167,20 @@ function StatusPage() {
       });
     }
   }, [readyState, t]);
+
+  useEffect(() => {
+    if (!exePath) {
+      const autoSearch = async () => {
+        const filePath = await window.electron.ipcRenderer.searchForGame();
+        if (filePath === null) {
+          return;
+        }
+        setExePath(filePath || '');
+      };
+      autoSearch();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const queuedGroups = new Set(status?.queues?.flatMap((q) => q.groupIds));
   const notQueuedGroups =
